@@ -7,7 +7,8 @@ const description = Joi.string()
 const completed = Joi.boolean()
 
 const taskSchema = {
-  add: Joi.object().keys({ description: description.required(), completed })
+  add: Joi.object().keys({ description: description.required(), completed }),
+  edit: Joi.object().keys({ description, completed })
 }
 
 module.exports = taskSchema
