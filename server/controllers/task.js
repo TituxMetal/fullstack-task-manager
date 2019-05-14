@@ -28,9 +28,20 @@ const addTask = async ({ value }, res) => {
   }
 }
 
+const removeTask = async ({ params }, res) => {
+  try {
+    const task = await Task.findOneAndDelete({ _id: params.id })
+
+    res.json(task)
+  } catch (e) {
+    res.status(400).send(e.message)
+  }
+}
+
 const TaskController = {
   getAllTasks,
-  addTask
+  addTask,
+  removeTask
 }
 
 module.exports = TaskController
