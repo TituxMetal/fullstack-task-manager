@@ -7,6 +7,7 @@ const {
   taskOneId,
   taskTwo,
   taskTwoId,
+  fakeId,
   setupDatabase,
   cleanupDatabase
 } = require('./setup')
@@ -76,6 +77,27 @@ describe('Tasks Routes', () => {
       expect(await Task.find().countDocuments()).toBe(2)
       expect(JSON.parse(error.text).errors.description).toBeDefined()
       expect(JSON.parse(error.text).errors.completed).toBeDefined()
+    })
+  })
+
+  describe('DELETE /api/tasks/:id => Delete task', () => {
+    it('should delete a task', async () => {
+      const { body } = await request(server)
+        .delete(`/api/tasks/${taskOneId}`)
+        .expect(200)
+
+      expect(await Task.find().countDocuments()).toBe(1)
+      expect(await Task.findOne({ _id: taskOneId })).toBe(null)
+      expect(body._id).toBe(taskOneId.toString())
+    })
+
+    it('should return an empty object if no task found', async () => {
+      const { body } = request(server)
+        .delete(`/api/tasks/${fakeId}`)
+        .expect(200)
+
+      expect(await Task.find().countDocuments()).toBe(2)
+      expect(await Task.findOne({ _id: fakeId })).toBe(null)
     })
   })
 })
