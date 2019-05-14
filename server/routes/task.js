@@ -8,4 +8,6 @@ router.get('/', TaskController.getAllTasks)
 
 router.post('/', validateBody(add), TaskController.addTask)
 
+router.delete('/:id', TaskController.removeTask)
+
 module.exports = router
