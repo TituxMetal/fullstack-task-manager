@@ -28,6 +28,35 @@ const addTask = async ({ value }, res) => {
   }
 }
 
+const updateTask = async ({ params, value }, res) => {
+  const { description, completed } = value.body
+
+  try {
+    const task = await Task.findOne({ _id: params.id })
+
+    if (!task) {
+      const error = JSON.stringify({ errors: 'No task found' })
+      throw new Error(error)
+    }
+
+    const foundTask = await Task.find({ description }).countDocuments()
+
+    if (foundTask) {
+      const error = JSON.stringify({ errors: { description: 'Task already exists' } })
+      throw new Error(error)
+    }
+
+    task.description = description || task.description
+    task.completed = description ? false : completed || !task.completed
+
+    const updatedTask = await task.save()
+
+    res.json(updatedTask)
+  } catch (e) {
+    res.status(400).send(e.message)
+  }
+}
+
 const removeTask = async ({ params }, res) => {
   try {
     const task = await Task.findOneAndDelete({ _id: params.id })
@@ -41,6 +70,7 @@ const removeTask = async ({ params }, res) => {
 const TaskController = {
   getAllTasks,
   addTask,
+  updateTask,
   removeTask
 }
 
