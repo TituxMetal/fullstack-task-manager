@@ -80,6 +80,58 @@ describe('Tasks Routes', () => {
     })
   })
 
+  describe('PATCH /api/tasks/:id => Edit task', () => {
+    it('should update the task with the given id', async () => {
+      const { body } = await request(server)
+        .patch(`/api/tasks/${taskOneId}`)
+        .send({ description: 'Updated task one' })
+        .expect(200)
+
+      const { description, completed } = await Task.findOne({ _id: taskOneId })
+
+      expect(body).toMatchObject({ description, completed })
+    })
+
+    it('should toggle comleted property for task', async () => {
+      const { body } = await request(server)
+        .patch(`/api/tasks/${taskOneId}`)
+        .send()
+        .expect(200)
+
+      const { completed } = await Task.findOne({ _id: taskOneId })
+      expect(completed).toBe(!taskOne.completed)
+    })
+
+    it('should return an error if no task found', async () => {
+      const { error } = await request(server)
+        .patch(`/api/tasks/${fakeId}`)
+        .send({ completed: false })
+        .expect(400)
+
+      expect(JSON.parse(error.text).errors).toBe('No task found')
+    })
+
+    it('should not update task if invalid data given', async () => {
+      const { error } = await request(server)
+        .patch(`/api/tasks/${taskOneId}`)
+        .send({ description: '    abc   ', completed: 'falsy' })
+        .expect(400)
+
+      expect(JSON.parse(error.text).errors.description).toBeDefined()
+      expect(JSON.parse(error.text).errors.completed).toBeDefined()
+    })
+
+    it('should not update task if the same task description already exists', async () => {
+      const { description } = taskTwo
+      const { error } = await request(server)
+        .patch(`/api/tasks/${taskOneId}`)
+        .send({ description })
+        .expect(400)
+
+      expect(JSON.parse(error.text).errors.description).toBe('Task already exists')
+    })
+  })
+
   describe('DELETE /api/tasks/:id => Delete task', () => {
     it('should delete a task', async () => {
       const { body } = await request(server)
